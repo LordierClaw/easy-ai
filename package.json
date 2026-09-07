@@ -1,0 +1,95 @@
+{
+  "name": "easyai",
+  "version": "0.1.0",
+  "description": "Trợ lý cài đặt và hỗ trợ công cụ theo hướng dẫn doanh nghiệp",
+  "main": "out/main/index.js",
+  "type": "module",
+  "author": "EasyAI",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "npm run build && playwright test",
+    "test:live": "npm run build && playwright test --config playwright.live.config.ts",
+    "docs:validate": "tsx scripts/publish.ts validate",
+    "docs:prepare": "tsx scripts/publish.ts prepare",
+    "dist": "npm run build && tsx scripts/create-icon.ts && electron-builder --win nsis portable --x64",
+    "test:packaged": "playwright test --config playwright.packaged.config.ts",
+    "test:vm": "playwright test --config playwright.vm.config.ts",
+    "probe:ai": "tsx scripts/probe-ai.ts"
+  },
+  "build": {
+    "appId": "vn.easyai.desktop",
+    "productName": "EasyAI",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "content",
+        "to": "content"
+      }
+    ],
+    "asarUnpack": [
+      "**/*.wasm"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "artifactName": "EasyAI-${version}-${arch}.${ext}",
+      "signExecutable": false,
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "artifactName": "EasyAI-${version}-Setup.exe",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "portable": {
+      "artifactName": "EasyAI-${version}-Portable.exe"
+    }
+  },
+  "dependencies": {
+    "@assistant-ui/react": "0.15.18",
+    "@earendil-works/pi-ai": "0.85.1",
+    "@earendil-works/pi-coding-agent": "0.85.1",
+    "@radix-ui/react-slot": "1.3.3",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "gray-matter": "4.0.3",
+    "lucide-react": "1.41.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "smol-toml": "1.8.0",
+    "sql.js": "1.14.2",
+    "tailwind-merge": "3.6.0",
+    "typebox": "1.3.28",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/sql.js": "1.4.11",
+    "@vitejs/plugin-react": "5.2.0",
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vite": "7.3.6",
+    "vitest": "3.2.7"
+  }
+}

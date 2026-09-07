@@ -1,0 +1,10 @@
+{
+  "labRoot": "D:\\VMs\\EasyAI",
+  "vmrun": "C:\\Program Files (x86)\\VMware\\VMware Workstation\\vmrun.exe",
+  "vmx": "D:\\VMs\\EasyAI\\Windows11\\Windows11.vmx",
+  "sshHost": "192.168.56.10",
+  "sshUser": "easyai-test",
+  "sshKey": "C:\\Users\\YOUR_USER\\.ssh\\easyai_lab",
+  "guestRoot": "C:\\EasyAI-Lab",
+  "snapshot": "easyai-standard-missing"
+}

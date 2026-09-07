@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "revision": "<FULL_COMMIT_SHA_OF_THE_THREE_MARKDOWN_FILES>",
+  "files": [
+    { "path": "codex.md", "sha256": "<SHA256_OF_COMMITTED_BYTES>" },
+    { "path": "policy.md", "sha256": "<SHA256_OF_COMMITTED_BYTES>" },
+    { "path": "bm01.md", "sha256": "<SHA256_OF_COMMITTED_BYTES>" }
+  ]
+}
