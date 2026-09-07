@@ -14,7 +14,11 @@ test('published GitHub documents load through Electron and remain available offl
     expect(online.bundle?.revision).toMatch(/^[a-f0-9]{40}$/)
     await page.evaluate(id => window.easy.cancel(id), online.id)
     await expect.poll(async () => (await page.evaluate(() => window.easy.list()))[0]?.status, { timeout: 30000 }).toMatch(/^(interrupted|cancelled)$/)
-    await app.evaluate(({ session }) => session.defaultSession.enableNetworkEmulation({ offline: true }))
+    await app.evaluate(async ({ session }) => {
+      await session.defaultSession.clearCache()
+      session.defaultSession.enableNetworkEmulation({ offline: true })
+      session.defaultSession.webRequest.onBeforeRequest({ urls: ['https://raw.githubusercontent.com/*'] }, (_details, callback) => callback({ cancel: true }))
+    })
     await page.evaluate(() => window.easy.start('install', 'Kiểm tra cache; chưa xác nhận thay đổi máy.'))
     await expect.poll(async () => (await page.evaluate(() => window.easy.list()))[0]?.bundle?.source, { timeout: 90000 }).toBe('cache')
     const cached = (await page.evaluate(() => window.easy.list()))[0]

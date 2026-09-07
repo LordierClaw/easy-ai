@@ -20,4 +20,4 @@ if($LASTEXITCODE){throw 'Đóng gói không đạt. Xem artifacts/packaging.log.
 if($LASTEXITCODE){throw 'Packaged smoke test không đạt.'}
 & npm.cmd audit --omit=dev
 if($LASTEXITCODE){throw 'Dependency audit cần xử lý.'}
-Write-Output 'Các gate local đã đạt. Nghiệm thu GitHub/VM/user login vẫn là các gate riêng theo docs/acceptance.md.'
+Write-Output 'Các gate local đã đạt. Nghiệm thu VM/user login vẫn là các gate riêng theo docs/acceptance.md.'
