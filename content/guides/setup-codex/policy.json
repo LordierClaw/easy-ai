@@ -1,0 +1,166 @@
+{
+  "probes": {
+    "account": {
+      "operation": "system_info"
+    },
+    "git": {
+      "operation": "find_executable",
+      "name": "git.exe"
+    },
+    "node": {
+      "operation": "find_executable",
+      "name": "node.exe"
+    },
+    "openai": {
+      "operation": "http_probe",
+      "url": "https://api.openai.com"
+    },
+    "chatgpt": {
+      "operation": "http_probe",
+      "url": "https://chatgpt.com"
+    },
+    "auth": {
+      "operation": "http_probe",
+      "url": "https://auth.openai.com"
+    }
+  },
+  "rules": [
+    {
+      "id": "missing-git-standard",
+      "all": [
+        {
+          "probe": "account",
+          "predicate": {
+            "field": "admin",
+            "operator": "equals",
+            "value": false
+          }
+        },
+        {
+          "probe": "git",
+          "predicate": {
+            "field": "found",
+            "operator": "equals",
+            "value": false
+          }
+        }
+      ],
+      "reason": "Thiếu Git và tài khoản không có quyền admin. Nhờ IT cài đặt theo quy định.",
+      "template": "templates/request-installation.md"
+    },
+    {
+      "id": "missing-node-standard",
+      "all": [
+        {
+          "probe": "account",
+          "predicate": {
+            "field": "admin",
+            "operator": "equals",
+            "value": false
+          }
+        },
+        {
+          "probe": "node",
+          "predicate": {
+            "field": "found",
+            "operator": "equals",
+            "value": false
+          }
+        }
+      ],
+      "reason": "Thiếu Node.js và tài khoản không có quyền admin. Nhờ IT cài đặt theo quy định.",
+      "template": "templates/request-installation.md"
+    },
+    {
+      "id": "openai-unreachable",
+      "all": [
+        {
+          "probe": "openai",
+          "predicate": {
+            "field": "reachable",
+            "operator": "equals",
+            "value": false
+          }
+        }
+      ],
+      "reason": "Không kết nối được API OpenAI; cần IT kiểm tra đường mạng.",
+      "template": "templates/request-network-access.md"
+    },
+    {
+      "id": "chatgpt-unreachable",
+      "all": [
+        {
+          "probe": "chatgpt",
+          "predicate": {
+            "field": "reachable",
+            "operator": "equals",
+            "value": false
+          }
+        }
+      ],
+      "reason": "Không kết nối được ChatGPT; cần IT kiểm tra đường mạng.",
+      "template": "templates/request-network-access.md"
+    },
+    {
+      "id": "auth-unreachable",
+      "all": [
+        {
+          "probe": "auth",
+          "predicate": {
+            "field": "reachable",
+            "operator": "equals",
+            "value": false
+          }
+        }
+      ],
+      "reason": "Không kết nối được dịch vụ đăng nhập; cần IT kiểm tra đường mạng.",
+      "template": "templates/request-network-access.md"
+    },
+    {
+      "reason": "Dependency cần nâng phiên bản nhưng tài khoản không có quyền admin. Nhờ IT cập nhật theo hướng dẫn.",
+      "all": [
+        {
+          "predicate": {
+            "operator": "equals",
+            "value": false,
+            "field": "admin"
+          },
+          "probe": "account"
+        },
+        {
+          "predicate": {
+            "operator": "version_lt",
+            "value": "2.40",
+            "field": "version"
+          },
+          "probe": "git"
+        }
+      ],
+      "template": "templates/request-installation.md",
+      "id": "old-git-standard"
+    },
+    {
+      "reason": "Dependency cần nâng phiên bản nhưng tài khoản không có quyền admin. Nhờ IT cập nhật theo hướng dẫn.",
+      "all": [
+        {
+          "predicate": {
+            "operator": "equals",
+            "value": false,
+            "field": "admin"
+          },
+          "probe": "account"
+        },
+        {
+          "predicate": {
+            "operator": "version_lt",
+            "value": "22",
+            "field": "version"
+          },
+          "probe": "node"
+        }
+      ],
+      "template": "templates/request-installation.md",
+      "id": "old-node-standard"
+    }
+  ]
+}

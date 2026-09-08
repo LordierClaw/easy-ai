@@ -1,30 +1,28 @@
-# Publish tài liệu doanh nghiệp
+# Publish guide EasyAI v2
 
-## Bộ tài liệu
+Mỗi mục nằm trong `guides/<id>/`, có `GUIDE.md` bắt buộc và các thư mục `references/`, `templates/`, `scripts/` tùy chọn. Frontmatter GUIDE chỉ chứa id, name, description, platform và actions. Xem hai mẫu trong `content/guides/` của repo ứng dụng.
 
-- `content/codex.md`: YAML frontmatter + Markdown hướng dẫn.
-- `content/policy.md`: policy có cấu trúc và hướng dẫn chung.
-- `content/bm01.md`: biểu mẫu hỗ trợ với các trường `{{reason}}`, `{{time}}`, `{{runId}}`, `{{revision}}`, `{{components}}`, `{{evidence}}`, `{{steps}}`.
-- `content/manifest.json`: manifest được tạo từ byte của tài liệu **đã commit**.
-- `content/manifest.example.json`: ví dụ cấu trúc với placeholder rõ ràng; không dùng file này làm manifest chạy thật.
+AI đọc GUIDE trước khi kiểm tra nghiệp vụ. File script chỉ là tài liệu; việc chạy nội dung phải nằm trong kế hoạch được user xác nhận. Policy tổng quát khai báo trong `policy.json`: probes dùng query có executor cố định, rules tham chiếu probe, predicate và template hỗ trợ. Không đặt key, token hoặc dữ liệu cá nhân trong repo public.
 
-Repo tài liệu: https://github.com/LordierClaw/easy-ai-docs. Client dùng cố định https://raw.githubusercontent.com/LordierClaw/easy-ai-docs/main/content/manifest.json.
+Client dùng cố định `https://raw.githubusercontent.com/LordierClaw/easy-ai-docs/main/content/guides-manifest.json`. Manifest v2 chứa commit SHA và SHA256 từng file. File nằm ngoài thư mục guide, đường dẫn vượt thư mục, hash sai hoặc thiếu GUIDE đều bị từ chối. Phiên đang chạy giữ nguyên bundle; phiên mới nhận nội dung mới. Cache chỉ được dùng khi vẫn hợp lệ.
 
-## Quy trình
+## Quy trình publish
 
-1. Sửa và review ba file Markdown, chạy `npm run docs:validate -- --repo <đường-dẫn-checkout-easy-ai-docs>`.
-2. Commit ba file vào repo GitHub public đã chọn. Không đưa API key hoặc token vào content.
-3. Chạy `npm run docs:prepare -- <commit-SHA-40-ký-tự> --repo <đường-dẫn-checkout-easy-ai-docs>`. Script đọc đúng nội dung commit và tạo manifest với SHA256. Nó không tự commit/push.
-4. Commit manifest ở commit tiếp theo rồi publish cả hai commit. Manifest trên nhánh ổn định trỏ về commit tài liệu ở bước 2; cách này tránh vòng phụ thuộc SHA tự tham chiếu.
-5. Điền URL `https://raw.githubusercontent.com/<owner>/<repo>/<branch>/content/manifest.json` vào `GITHUB_MANIFEST_URL` trong `src/main/config.ts`, rồi build.
-6. Chạy app không có `--demo`/`--sample-content`; kiểm tra nguồn GitHub và revision ở panel bên phải. Tắt mạng và mở phiên mới để kiểm tra cache hợp lệ.
+Chạy từ repo ứng dụng:
 
-Mỗi phiên giữ nguyên bundle đã đọc, kể cả retry sau IT. Mở phiên mới để nhận tài liệu mới. Client kiểm tra HTTPS/raw GitHub, schema, số file, SHA256 và bốn điều kiện policy bắt buộc. Nếu không tải được bản mới, chỉ dùng cache còn khớp hash; nếu không có thì dừng. Không tải instruction từ URL do AI tự đề xuất.
+```powershell
+npm run docs:validate -- --repo D:\Code\easy-ai-docs
+# Commit các file guides trong repo tài liệu, lấy full SHA của commit.
+npm run docs:prepare -- <full-commit-sha> --repo D:\Code\easy-ai-docs
+# Commit content/guides-manifest.json ở commit tiếp theo, rồi push cả hai.
+```
 
-## Năng lực hiện có
+Giữ nguyên `content/manifest.json` và revision v1 để client cũ tiếp tục đọc được. Không thay nội dung commit đã publish. Phiên v1 trong ứng dụng v2 chỉ xem/xuất được; tiếp tục bằng phiên v2 mới có liên kết lịch sử.
 
-MVP có workflow Codex và các operation `inspect`, `install_component`, `configure_proxy`, `read_config`, `verify`, `ask_user`, `request_support`. Trong tác vụ sửa đã được duyệt và metadata cho phép, có thêm `reset_codex_provider` và `reinstall_codex`; tool sửa provider sao lưu file thật trước khi bỏ các khóa lựa chọn cấp gốc. Admin có thể sửa nội dung/quy định trong hợp đồng hiện có. Thêm loại phần mềm/operation mới cần mở rộng executor, schema và test; metadata không phải mã thực thi.
+## Năng lực client
 
-Nguồn cài được executor cố định: Git.Git/OpenJS.NodeJS.LTS qua winget (kiểm tra hash của nguồn), `@openai/codex` qua npm HTTPS (integrity của tarball) và ChatGPT qua Store ID `9NT1R1C2HH7J`. Không dùng URL tùy ý trong log hay hội thoại làm installer.
+Query trước xác nhận: thông tin hệ thống, tìm executable/package, đọc file/registry và kiểm tra HTTP. Thay đổi sau xác nhận: ghi file có backup, chỉnh khóa TOML có backup, tải HTTPS có SHA256, chạy PowerShell hoặc tiến trình. Kế hoạch gồm bước cụ thể và tiêu chí kiểm chứng; tên thành phần là dữ liệu do guide/AI cung cấp.
 
-Chạy các lệnh npm từ repo easy-ai; tham số --repo chọn checkout easy-ai-docs. Đẩy commit tài liệu và manifest vào easy-ai-docs. Không cần build lại client khi chỉ đổi nội dung đúng schema.
+Mẫu hỗ trợ có frontmatter `recipient`, `subject`; nội dung dùng `{{summary}}`, `{{request}}`, `{{attempts}}`, `{{nextSteps}}`, `{{reason}}`, `{{date}}`, `{{guide}}`. Người nhận phải có trong mẫu, không tự suy đoán. Bằng chứng kỹ thuật được tách khỏi email.
+
+Thêm guide dùng các query/mutation/predicate hiện có không cần phát hành lại client. Thêm loại executor hoặc điều kiện mới cần sửa schema, executor và test. Hook chỉ đăng ký trong mã ứng dụng; guide không nạp plugin/extension. Utility Process và hook không phải sandbox hệ điều hành.

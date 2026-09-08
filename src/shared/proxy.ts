@@ -1,4 +1,4 @@
-import type { ProxyInfo } from './types'
+export interface ProxyInfo { enabled: boolean; server: string; bypass: string; pac?: string }
 export function proxyFor(url: string, info: ProxyInfo): string | undefined {
   const u = new URL(url)
   if (['localhost', '127.0.0.1', '[::1]'].includes(u.hostname)) return undefined

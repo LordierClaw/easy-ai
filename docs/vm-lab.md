@@ -6,7 +6,7 @@ Trên host cài VMware Workstation Pro, tạo Windows 11 x64 và Windows 10 22H2
 
 Tạo tài khoản admin để chuẩn bị và `easyai-test` standard user để nghiệm thu. Đăng nhập desktop bằng tài khoản test khi chạy GUI. Không bật autologin hoặc lưu mật khẩu vào repo. Không dùng snapshot có session ChatGPT đã đăng nhập làm baseline chia sẻ.
 
-Chưa có VMX/SSH thật được cung cấp trong phiên triển khai. Các script dưới đây không được coi là đã nghiệm thu trên guest cho đến khi chạy và thu artifact.
+VM Windows 10 đã được cung cấp tại D:\Code\vm-win10\Windows 10 x64.vmx; VMware Tools hoạt động, snapshot easyai-before-fresh-install đã tạo. Đang chờ xác thực guest; SSH chưa kết nối được. Các script dưới đây không được coi là đã nghiệm thu trên guest cho đến khi chạy và thu artifact.
 
 ## Build và chuyển test harness
 
@@ -37,7 +37,7 @@ Tunnel chạy ở terminal riêng: guest `127.0.0.1:20128` chuyển tới API c�
 
 Chỉ coi một lần chạy xong khi `C:\EasyAI-Lab\artifacts\status.json` có `completed=true`. `exitCode=0` mới là pass. Lệnh kích hoạt task thành công không chứng minh test thành công. Artifact gồm log, ảnh, báo cáo và trace theo suite.
 
-Suite `real` chạy installer thật, có chặn kiểm tra model máy VMware và cờ `EASYAI_REAL_VM`. Mặc định yêu cầu cài đủ bộ, chờ user xử lý UAC và đăng nhập. Để test baseline chặn, đặt `EASYAI_VM_EXPECT=standard-missing` hoặc `network-blocked` trong môi trường task trước khi chạy. Bản sample và bundle GitHub thật là hai ca riêng; suite real hiện dùng sample đã ghi rõ trên UI.
+Suite `real` chạy installer thật, có chặn kiểm tra model máy VMware và cờ `EASYAI_REAL_VM`. Mặc định yêu cầu cài đủ bộ, chờ user xử lý UAC và đăng nhập. Để test baseline chặn, đặt `EASYAI_VM_EXPECT=standard-missing` hoặc `network-blocked` trong môi trường task trước khi chạy. Bản sample và bundle GitHub thật là hai ca riêng; suite real mặc định dùng GitHub thật; chỉ dùng sample đã ghi rõ trên UI khi đặt EASYAI_VM_SAMPLE=1.
 
 ## Proxy bắt buộc
 

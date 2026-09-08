@@ -1,16 +1,17 @@
 import { spawn } from 'node:child_process'
 import { StringDecoder } from 'node:string_decoder'
 import { redact } from '../shared/redact'
-export interface CommandResult { code: number; output: string; stdout: string; stderr: string }
+export interface CommandResult { code: number; output: string; stdout: string; stderr: string; truncated?: boolean; capturedCharacters?: number }
 export function command(exe: string, args: string[], options: { env?: NodeJS.ProcessEnv; cwd?: string; signal?: AbortSignal; timeout?: number; installer?: boolean; onOutput?: (text: string) => void } = {}): Promise<CommandResult> {
   return new Promise((resolve, reject) => {
     if (options.signal?.aborted) return reject(new Error('Đã hủy tác vụ.'))
     const child = spawn(exe, args, { shell: false, windowsHide: true, cwd: options.cwd, env: options.env || process.env, stdio: ['ignore', 'pipe', 'pipe'] })
-    let output = ''; let stdout = ''; let stderr = ''; let stopped = false
+    let output = ''; let stdout = ''; let stderr = ''; let stopped = false; let capturedCharacters = 0
     const decoders = { stdout: new StringDecoder('utf8'), stderr: new StringDecoder('utf8') }
     const lineBuffers = { stdout: '', stderr: '' }
     const collect = (buffer: Buffer, stream: 'stdout' | 'stderr') => {
       const text = decoders[stream].write(buffer)
+      capturedCharacters += text.length
       output = (output + text).slice(-64000)
       if (stream === 'stdout') stdout = (stdout + text).slice(-64000); else stderr = (stderr + text).slice(-64000)
       lineBuffers[stream] = (lineBuffers[stream] + text).slice(-64000)
@@ -28,7 +29,13 @@ export function command(exe: string, args: string[], options: { env?: NodeJS.Pro
     const timer = setTimeout(kill, options.timeout ?? 60000)
     const cleanup = () => { clearTimeout(timer); options.signal?.removeEventListener('abort', abort) }
     child.on('error', e => { cleanup(); reject(new Error(redact(e.message))) })
-    child.on('close', code => { cleanup(); if (stopped) reject(new Error('Tác vụ bị dừng hoặc quá thời gian; cần kiểm tra lại hiện trạng.')); else resolve({ code: code ?? -1, output: redact(output), stdout: redact(stdout + decoders.stdout.end()), stderr: redact(stderr + decoders.stderr.end()) }) })
+    child.on('close', code => {
+      cleanup()
+      const tails = { stdout: decoders.stdout.end(), stderr: decoders.stderr.end() }
+      for (const stream of ['stdout', 'stderr'] as const) if (lineBuffers[stream] || tails[stream]) options.onOutput?.(redact(lineBuffers[stream] + tails[stream]))
+      if (stopped) reject(new Error('Tác vụ bị dừng hoặc quá thời gian; cần kiểm tra lại hiện trạng.'))
+      else resolve({ code: code ?? -1, output: redact(output), stdout: redact(stdout + tails.stdout), stderr: redact(stderr + tails.stderr), truncated: capturedCharacters > 64000, capturedCharacters })
+    })
   })
 }
 export const psQuote = (s: string) => `'${s.replaceAll("'", "''")}'`

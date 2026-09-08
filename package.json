@@ -1,6 +1,6 @@
 {
   "name": "easyai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Trợ lý cài đặt và hỗ trợ công cụ theo hướng dẫn doanh nghiệp",
   "main": "out/main/index.js",
   "type": "module",
@@ -13,8 +13,8 @@
     "test": "vitest run",
     "test:e2e": "npm run build && playwright test",
     "test:live": "npm run build && playwright test --config playwright.live.config.ts",
-    "docs:validate": "tsx scripts/publish.ts validate",
-    "docs:prepare": "tsx scripts/publish.ts prepare",
+    "docs:validate": "tsx scripts/publish-guides.ts validate",
+    "docs:prepare": "tsx scripts/publish-guides.ts prepare",
     "dist": "npm run build && tsx scripts/create-icon.ts && electron-builder --win nsis portable --x64",
     "test:packaged": "playwright test --config playwright.packaged.config.ts",
     "test:vm": "playwright test --config playwright.vm.config.ts",
@@ -22,6 +22,7 @@
   },
   "build": {
     "appId": "vn.easyai.desktop",
+    "electronDist": "node_modules/electron/dist",
     "productName": "EasyAI",
     "directories": {
       "output": "release"
